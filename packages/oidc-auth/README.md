@@ -15,6 +15,8 @@ This middleware provides storage-less login sessions.
 7. After the refresh interval (default set to 15 minutes), the middleware implicitly accesses the IdP's token endpoint using the refresh token to verify that the user is still authenticated and regenerates the session cookie.
 8. If the session is expired (default set to 1 day), the middleware revokes the refresh token and redirects the user to the IdP's authentication endpoint. Continue to step 3.
 
+![Sequence diagram for oidc-auth](./images/sequence-diagram.svg)
+
 ## Supported Identity Providers (IdPs)
 
 This middleware requires the following features for the IdP:

@@ -1,0 +1,84 @@
+plantuml
+@startuml
+skinparam sequence {
+  LifeLineBackgroundColor #DFE2E5
+}
+actor Browser
+participant "Application Server" as AppServer
+participant "ID Provider" as IdP
+
+== Authorized Access Flow ==
+
+activate Browser
+Browser -> AppServer: Authorized resource request
+activate AppServer
+AppServer -> AppServer: Validate session JWT
+
+alt Session valid
+    opt After refresh interval
+        AppServer -> IdP: Refresh token grant request
+        activate IdP
+        IdP -> IdP: Check if the user is still signed in
+        IdP -> AppServer: New ID token, refresh token (if rotated)
+        deactivate IdP
+        AppServer -> AppServer: Generate new session JWT
+    end
+    note over AppServer: Execute custom logic
+    AppServer -> Browser: Response contents
+    deactivate AppServer
+    deactivate Browser
+else Session invalid or expired
+    Browser -[hidden]-> AppServer
+    activate Browser
+    activate AppServer
+    opt After session expiration
+        AppServer -> IdP: Revoke refresh token request
+        activate IdP
+        deactivate IdP
+    end
+    AppServer -> AppServer: Generate state, nonce, code_verifier
+    AppServer -> AppServer: Set secrets to cookie
+    AppServer -> Browser: Redirect to IdP's authentication endpoint
+    note right of Browser: Continue to Authentication Flow
+    deactivate AppServer
+end
+
+== Authentication Flow ==
+
+Browser -> IdP: Authentication request (state, nonce, code_challenge)
+activate IdP
+note over IdP: User authentication
+IdP -> IdP: Store nonce, code_challenge
+IdP -> Browser: Redirect to callback URL
+deactivate IdP
+
+Browser -> AppServer: Autentication callback request\n(state, authorization code)
+activate AppServer
+AppServer -> AppServer: Get secrets from cookie\n(state, nonce, code_verifier)
+AppServer -> AppServer: Validate state
+AppServer -> IdP: Authorization code grant request\n(code_verifier, authorization code)
+activate IdP
+IdP -> IdP: Validate code_verifier
+IdP -> IdP: Validate authorization code
+IdP -> AppServer: ID token, refresh token, nonce
+deactivate IdP    
+AppServer -> AppServer: Validate nonce
+AppServer -> AppServer: Generate session JWT
+AppServer -> Browser: Redirect to original URL
+note right of Browser: Continue to Authorized Access Flow
+deactivate AppServer
+deactivate Browser
+
+== Logout Flow ==
+
+Browser -> AppServer: Logout request
+activate Browser
+activate AppServer
+AppServer -> IdP: Revoke refresh token request
+activate IdP
+deactivate IdP
+AppServer -> Browser: Clear session cookie
+deactivate AppServer
+deactivate Browser
+
+@enduml
