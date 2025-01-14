@@ -15,6 +15,11 @@ const MOCK_STATE = crypto.randomBytes(16).toString('hex') // 32 bytes
 const MOCK_NONCE = crypto.randomBytes(16).toString('hex') // 32 bytes
 const MOCK_AUTH_SECRET = crypto.randomBytes(16).toString('hex') // 32 bytes
 const MOCK_AUTH_EXPIRES = '3600'
+const mock_iv = crypto.randomBytes(12)
+const mock_digest = crypto.createHash('sha256').update(MOCK_AUTH_SECRET).digest()
+const mock_cipher = crypto.createCipheriv('aes-256-gcm', mock_digest, mock_iv);
+const mock_ciphertext = Buffer.concat([mock_iv, mock_cipher.update('DUMMY_REFRESH_TOKEN', 'utf8'), mock_cipher.final(), mock_cipher.getAuthTag()])
+const MOCK_ENCRYPTED_REFRESH_TOKEN = mock_ciphertext.toString('base64')
 const MOCK_ID_TOKEN = jwt.sign(
   {
     iss: MOCK_ISSUER,
@@ -59,7 +64,7 @@ const MOCK_JWT_ACTIVE_SESSION = jwt.sign(
   {
     sub: MOCK_SUBJECT,
     email: MOCK_EMAIL,
-    rtk: 'DUMMY_REFRESH_TOKEN',
+    rtk: MOCK_ENCRYPTED_REFRESH_TOKEN,
     rtkexp: Math.floor(Date.now() / 1000) + 10 * 60, // 10 minutes
     ssnexp: Math.floor(Date.now() / 1000) + 10 * 60, // 10 minutes
   },
@@ -70,7 +75,7 @@ const MOCK_JWT_TOKEN_EXPIRED_SESSION = jwt.sign(
   {
     sub: MOCK_SUBJECT,
     email: MOCK_EMAIL,
-    rtk: 'DUMMY_REFRESH_TOKEN',
+    rtk: MOCK_ENCRYPTED_REFRESH_TOKEN,
     rtkexp: Math.floor(Date.now() / 1000) - 1, // expired
     ssnexp: Math.floor(Date.now() / 1000) + 10 * 60, // 10 minutes
   },
@@ -81,7 +86,7 @@ const MOCK_JWT_EXPIRED_SESSION = jwt.sign(
   {
     sub: MOCK_SUBJECT,
     email: MOCK_EMAIL,
-    rtk: 'DUMMY_REFRESH_TOKEN',
+    rtk: MOCK_ENCRYPTED_REFRESH_TOKEN,
     rtkexp: Math.floor(Date.now() / 1000) - 1, // expired
     ssnexp: Math.floor(Date.now() / 1000) - 1, // expired
   },
@@ -92,7 +97,7 @@ const MOCK_JWT_INCORRECT_SECRET = jwt.sign(
   {
     sub: MOCK_SUBJECT,
     email: MOCK_EMAIL,
-    rtk: 'DUMMY_REFRESH_TOKEN',
+    rtk: MOCK_ENCRYPTED_REFRESH_TOKEN,
     rtkexp: Math.floor(Date.now() / 1000) + 10 * 60, // 10 minutes
     ssnexp: Math.floor(Date.now() / 1000) + 10 * 60, // 10 minutes
   },
@@ -103,7 +108,7 @@ const MOCK_JWT_INVALID_ALGORITHM = jwt.sign(
   {
     sub: MOCK_SUBJECT,
     email: MOCK_EMAIL,
-    rtk: 'DUMMY_REFRESH_TOKEN',
+    rtk: MOCK_ENCRYPTED_REFRESH_TOKEN,
     rtkexp: Math.floor(Date.now() / 1000) + 10 * 60, // 10 minutes
     ssnexp: Math.floor(Date.now() / 1000) + 10 * 60, // 10 minutes
   },
@@ -131,7 +136,7 @@ jest.unstable_mockModule('oauth4webapi', () => {
         JSON.stringify({
           access_token: 'DUMMY_ACCESS_TOKEN',
           expires_in: 3599,
-          refresh_token: 'DUUMMY_REFRESH_TOKEN',
+          refresh_token: 'DUMMY_REFRESH_TOKEN',
           scope: 'https://www.googleapis.com/auth/userinfo.email openid',
           token_type: 'Bearer',
           id_token: MOCK_ID_TOKEN,
@@ -143,7 +148,7 @@ jest.unstable_mockModule('oauth4webapi', () => {
         JSON.stringify({
           access_token: 'DUMMY_ACCESS_TOKEN',
           expires_in: 3599,
-          refresh_token: 'DUUMMY_REFRESH_TOKEN_RENEWED',
+          refresh_token: 'DUMMY_REFRESH_TOKEN_RENEWED',
           scope: 'https://www.googleapis.com/auth/userinfo.email openid',
           token_type: 'Bearer',
           id_token: MOCK_ID_TOKEN,
@@ -157,6 +162,7 @@ jest.unstable_mockModule('oauth4webapi', () => {
 })
 
 const { oidcAuthMiddleware, getAuth, processOAuthCallback, revokeSession } = await import('../src')
+const { decrypt } = await import('../src/aes')
 
 const app = new Hono()
 app.get('/logout', async (c) => {
@@ -174,7 +180,8 @@ app.get('/callback-custom', async (c) => {
 app.use('/*', oidcAuthMiddleware())
 app.all('/*', async (c) => {
   const auth = await getAuth(c)
-  return c.text(`Hello ${auth?.email}! Refresh token: ${auth?.rtk}`)
+  const raw_refresh_token = await decrypt(auth!.rtk, MOCK_AUTH_SECRET)
+  return c.text(`Hello ${auth?.email}! Refresh token: ${raw_refresh_token}`)
 })
 
 beforeEach(() => {
@@ -209,7 +216,7 @@ describe('oidcAuthMiddleware()', () => {
     expect(res).not.toBeNull()
     expect(res.status).toBe(200)
     expect(await res.text()).toBe(
-      `Hello ${MOCK_EMAIL}! Refresh token: DUUMMY_REFRESH_TOKEN_RENEWED`
+      `Hello ${MOCK_EMAIL}! Refresh token: DUMMY_REFRESH_TOKEN_RENEWED`
     )
   })
   test('Should redirect to authorization endpoint if session is expired', async () => {

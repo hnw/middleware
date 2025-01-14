@@ -8,6 +8,7 @@ import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import { sign, verify } from 'hono/jwt'
+import { encrypt, decrypt } from './aes'
 import * as oauth2 from 'oauth4webapi'
 
 export type IDToken = oauth2.IDToken
@@ -41,7 +42,7 @@ const defaultRefreshInterval = 15 * 60 // 15 minutes
 const defaultExpirationInterval = 60 * 60 * 24 // 1 day
 
 export type OidcAuth = {
-  rtk: string // refresh token
+  rtk: string // encrypted refresh token
   rtkexp: number // token expiration time ; refresh token if it's expired
   ssnexp: number // session expiration time; if it's expired, revoke session and redirect to IdP
 } & OidcAuthClaims
@@ -144,12 +145,12 @@ export const getAuth = async (c: Context): Promise<OidcAuth | null> => {
   const env = getOidcAuthEnv(c)
   let auth = c.get('oidcAuth')
   if (auth === undefined) {
-    const session_jwt = getCookie(c, env.OIDC_COOKIE_NAME)
-    if (session_jwt === undefined) {
+    const sessionJwt = getCookie(c, env.OIDC_COOKIE_NAME)
+    if (sessionJwt === undefined) {
       return null
     }
     try {
-      auth = await verify(session_jwt, env.OIDC_AUTH_SECRET) as OidcAuth
+      auth = await verify(sessionJwt, env.OIDC_AUTH_SECRET) as OidcAuth
     } catch (e) {
       deleteCookie(c, env.OIDC_COOKIE_NAME, { path: env.OIDC_COOKIE_PATH })
       return null
@@ -163,15 +164,23 @@ export const getAuth = async (c: Context): Promise<OidcAuth | null> => {
       revokeSession(c)
       return null
     }
+    // Refresh the token if it has expired
     if (auth.rtkexp < now) {
-      // Refresh the token if it has expired
       if (auth.rtk === undefined || auth.rtk === '') {
+        deleteCookie(c, env.OIDC_COOKIE_NAME, { path: env.OIDC_COOKIE_PATH })
+        return null
+      }
+      let refreshToken = ''
+      try {
+        refreshToken = await decrypt(auth.rtk, env.OIDC_AUTH_SECRET)
+      } catch {
+        // Failed to decrypt refresh token
         deleteCookie(c, env.OIDC_COOKIE_NAME, { path: env.OIDC_COOKIE_PATH })
         return null
       }
       const as = await getAuthorizationServer(c)
       const client = getClient(c)
-      const response = await oauth2.refreshTokenGrantRequest(as, client, auth.rtk)
+      const response = await oauth2.refreshTokenGrantRequest(as, client, refreshToken)
       const result = await oauth2.processRefreshTokenResponse(as, client, response)
       if (oauth2.isOAuth2Error(result)) {
         // The refresh_token might be expired or revoked
@@ -186,7 +195,10 @@ export const getAuth = async (c: Context): Promise<OidcAuth | null> => {
 }
 
 /**
- * Generates a new session JWT and sets the session cookie.
+ * Generates a new session JWT.
+ * @param c - The Hono context object.
+ * @param response - The token endpoint response.
+ * @returns The OidcAuth object.
  */
 const setAuth = async (
   c: Context,
@@ -196,7 +208,11 @@ const setAuth = async (
 }
 
 /**
- * Updates the session JWT and sets the new session cookie.
+ * Updates the session JWT.
+ * @param c - The Hono context object.
+ * @param orig - The original OidcAuth object.
+ * @param response - The token endpoint response.
+ * @returns The updated OidcAuth object.
  */
 const updateAuth = async (
   c: Context,
@@ -215,47 +231,67 @@ const updateAuth = async (
         email: (claims?.email as string) || orig?.email || '',
       }
     })
+  let newRtk = response.refresh_token
+  // Encrypt the refresh token if it exists
+  newRtk &&= await encrypt(newRtk, env.OIDC_AUTH_SECRET)
   const updated = {
     ...(await claimsHook(orig, claims, response)),
-    rtk: response.refresh_token || orig?.rtk || '',
+    rtk: newRtk || orig?.rtk || '',
     rtkexp: Math.floor(Date.now() / 1000) + authRefreshInterval,
     ssnexp: orig?.ssnexp || Math.floor(Date.now() / 1000) + authExpires,
   }
-  const session_jwt = await sign(updated, env.OIDC_AUTH_SECRET)
+  const sessionJwt = await sign(updated, env.OIDC_AUTH_SECRET)
   const cookieOptions =
     env.OIDC_COOKIE_DOMAIN == null
       ? { path: env.OIDC_COOKIE_PATH, httpOnly: true, secure: true }
       : { path: env.OIDC_COOKIE_PATH, domain: env.OIDC_COOKIE_DOMAIN, httpOnly: true, secure: true }
-  setCookie(c, env.OIDC_COOKIE_NAME, session_jwt, cookieOptions)
-  c.set('oidcAuthJwt', session_jwt)
+  setCookie(c, env.OIDC_COOKIE_NAME, sessionJwt, cookieOptions)
+  c.set('oidcAuthJwt', sessionJwt)
   return updated
 }
 
 /**
- * Revokes the refresh token of the current session and deletes the session cookie
+ * Revokes all data of the current session.
+ * @param c - The Hono context object.
  */
 export const revokeSession = async (c: Context): Promise<void> => {
   const env = getOidcAuthEnv(c)
-  const session_jwt = getCookie(c, env.OIDC_COOKIE_NAME)
-  if (session_jwt !== undefined) {
+  const sessionJwt = getCookie(c, env.OIDC_COOKIE_NAME)
+  if (sessionJwt) {
     deleteCookie(c, env.OIDC_COOKIE_NAME, { path: env.OIDC_COOKIE_PATH })
-    const auth = await verify(session_jwt, env.OIDC_AUTH_SECRET) as OidcAuth
-    if (auth.rtk !== undefined && auth.rtk !== '') {
-      // revoke refresh token
-      const as = await getAuthorizationServer(c)
-      const client = getClient(c)
-      if (as.revocation_endpoint !== undefined) {
-        const response = await oauth2.revocationRequest(as, client, auth.rtk)
-        const result = await oauth2.processRevocationResponse(response)
-        if (oauth2.isOAuth2Error(result)) {
-          throw new HTTPException(500, {
-            message: `OAuth2Error: [${result.error}] ${result.error_description}`,
-          })
-        }
+    const auth = await verify(sessionJwt, env.OIDC_AUTH_SECRET) as OidcAuth
+    if (auth.rtk) {
+      let refreshToken = ''
+      try {
+        refreshToken = await decrypt(auth.rtk, env.OIDC_AUTH_SECRET)
+      } catch {
+        // do nothing
+      }
+      if (refreshToken) {
+        await revokeRefreshToken(c, refreshToken)
       }
     }
   }
   c.set('oidcAuth', null)
+}
+
+/**
+ * Revokes the refresh token of the current session
+ * @param c - The Hono context object.
+ * @param refreshToken - refresh token string
+ */
+export const revokeRefreshToken = async (c: Context, refreshToken: string): Promise<void> => {
+  const as = await getAuthorizationServer(c)
+  const client = getClient(c)
+  if (as.revocation_endpoint) {
+    const response = await oauth2.revocationRequest(as, client, refreshToken)
+    const result = await oauth2.processRevocationResponse(response)
+    if (oauth2.isOAuth2Error(result)) {
+      throw new HTTPException(500, {
+        message: `OAuth2Error: [${result.error}] ${result.error_description}`,
+      })
+    }
+  }
 }
 
 /**
@@ -311,6 +347,7 @@ const generateAuthorizationRequestUrl = async (
 
 /**
  * Processes the OAuth2 callback request.
+ * @param c - The Hono context object.
  */
 export const processOAuthCallback = async (c: Context) => {
   const env = getOidcAuthEnv(c)
@@ -355,6 +392,12 @@ export const processOAuthCallback = async (c: Context) => {
 
 /**
  * Exchanges the authorization code for a refresh token.
+ * @param as - The authorization server metadata.
+ * @param client - The OAuth2 client metadata.
+ * @param params - The URL search parameters.
+ * @param redirect_uri - The redirect URI.
+ * @param nonce - The nonce parameter.
+ * @param code_verifier - The code verifier for PKCE.
  */
 const exchangeAuthorizationCode = async (
   as: oauth2.AuthorizationServer,
@@ -426,9 +469,9 @@ export const oidcAuthMiddleware = (): MiddlewareHandler => {
     await next()
     c.res.headers.set('Cache-Control', 'private, no-cache')
     // Workaround to set the session cookie when the response is returned by the origin server
-    const session_jwt = c.get('oidcAuthJwt')
-    if (session_jwt !== undefined) {
-      setCookie(c, env.OIDC_COOKIE_NAME, session_jwt, {
+    const sessionJwt = c.get('oidcAuthJwt')
+    if (sessionJwt !== undefined) {
+      setCookie(c, env.OIDC_COOKIE_NAME, sessionJwt, {
         path: env.OIDC_COOKIE_PATH,
         httpOnly: true,
         secure: true,
