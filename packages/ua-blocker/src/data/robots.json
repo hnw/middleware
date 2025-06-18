@@ -174,6 +174,13 @@
     "frequency": "Up to 1 page per second",
     "description": "Officially used for training Meta \"speech recognition technology,\" unknown if used to train Meta AI specifically."
   },
+  "facebookexternalhit": {
+    "operator": "Meta/Facebook",
+    "respect": "[No](https://github.com/ai-robots-txt/ai.robots.txt/issues/40#issuecomment-2524591313)",
+    "function": "Ostensibly only for sharing, but likely used as an AI crawler as well",
+    "frequency": "Unclear at this time.",
+    "description": "Note that excluding FacebookExternalHit will block incorporating OpenGraph data when sharing in social media, including rich links in Apple's Messages app. [According to Meta](https://developers.facebook.com/docs/sharing/webmasters/web-crawlers/), its purpose is \"to crawl the content of an app or website that was shared on one of Meta’s family of apps…\". However, see discussions [here](https://github.com/ai-robots-txt/ai.robots.txt/pull/21) and [here](https://github.com/ai-robots-txt/ai.robots.txt/issues/40#issuecomment-2524591313) for evidence to the contrary."
+  },
   "Factset_spyderbot": {
     "operator": "[Factset](https://www.factset.com/ai)",
     "respect": "Unclear at this time.",
@@ -314,6 +321,13 @@
     "description": "MistralAI-User is for user actions in LeChat. When users ask LeChat a question, it may visit a web page to help answer and include a link to the source in its response.",
     "respect": "Yes"
   },
+  "MyCentralAIScraperBot": {
+    "operator": "Unclear at this time.",
+    "respect": "Unclear at this time.",
+    "function": "AI data scraper",
+    "frequency": "Unclear at this time.",
+    "description": "Operator and data use is unclear at this time."
+  },
   "NovaAct": {
     "operator": "Unclear at this time.",
     "respect": "Unclear at this time.",
@@ -396,6 +410,13 @@
     "frequency": "No explicit frequency provided.",
     "function": "AI-enhanced search engine.",
     "operator": "[phind](https://www.phind.com/)",
+    "respect": "Unclear at this time."
+  },
+  "Poseidon Research Crawler": {
+    "operator": "[Poseidon Research](https://www.poseidonresearch.com)",
+    "description": "Lab focused on scaling the interpretability research necessary to make better AI systems possible.",
+    "frequency": "No explicit frequency provided.",
+    "function": "AI research crawler",
     "respect": "Unclear at this time."
   },
   "QualifiedBot": {
