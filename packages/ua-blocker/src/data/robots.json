@@ -55,6 +55,13 @@
     "frequency": "Unclear at this time.",
     "description": "Apple has a secondary user agent, Applebot-Extended ... [that is] used to train Apple's foundation models powering generative AI features across Apple products, including Apple Intelligence, Services, and Developer Tools."
   },
+  "Awario": {
+    "operator": "Awario",
+    "respect": "Unclear at this time.",
+    "function": "AI Data Scrapers",
+    "frequency": "Unclear at this time.",
+    "description": "Awario is an AI data scraper operated by Awario. It's not currently known to be artificially intelligent or AI-related. If you think that's incorrect or can provide more detail about its purpose, please contact us. More info can be found at https://darkvisitors.com/agents/agents/awario"
+  },
   "bedrockbot": {
     "operator": "[Amazon](https://amazon.com)",
     "respect": "[Yes](https://docs.aws.amazon.com/bedrock/latest/userguide/webcrawl-data-source-connector.html#configuration-webcrawl-connector)",
@@ -146,6 +153,20 @@
     "frequency": "Unclear at this time.",
     "description": "Provides crawling services for any purpose, probably including AI model training."
   },
+  "Datenbank Crawler": {
+    "operator": "Datenbank",
+    "respect": "Unclear at this time.",
+    "function": "AI Data Scrapers",
+    "frequency": "Unclear at this time.",
+    "description": "Datenbank Crawler is an AI data scraper operated by Datenbank. It's not currently known to be artificially intelligent or AI-related. If you think that's incorrect or can provide more detail about its purpose, please contact us. More info can be found at https://darkvisitors.com/agents/agents/datenbank-crawler"
+  },
+  "Devin": {
+    "operator": "Devin AI",
+    "respect": "Unclear at this time.",
+    "function": "AI Assistants",
+    "frequency": "Unclear at this time.",
+    "description": "Devin is an AI assistant operated by Devin AI. It's not currently known to be artificially intelligent or AI-related. If you think that's incorrect or can provide more detail about its purpose, please contact us. More info can be found at https://darkvisitors.com/agents/agents/devin"
+  },
   "Diffbot": {
     "operator": "[Diffbot](https://www.diffbot.com/)",
     "respect": "At the discretion of Diffbot users.",
@@ -160,6 +181,13 @@
     "frequency": "Unclear at this time.",
     "description": "DuckAssistBot is used by DuckDuckGo's DuckAssist feature to fetch content and generate realtime AI answers to user searches. More info can be found at https://darkvisitors.com/agents/agents/duckassistbot"
   },
+  "Echobot Bot": {
+    "operator": "Echobox",
+    "respect": "Unclear at this time.",
+    "function": "AI Data Scrapers",
+    "frequency": "Unclear at this time.",
+    "description": "Echobot Bot is an AI data scraper operated by Echobox. It's not currently known to be artificially intelligent or AI-related. If you think that's incorrect or can provide more detail about its purpose, please contact us. More info can be found at https://darkvisitors.com/agents/agents/echobot-bot"
+  },
   "EchoboxBot": {
     "operator": "[Echobox](https://echobox.com)",
     "respect": "Unclear at this time.",
@@ -173,6 +201,13 @@
     "function": "Training language models",
     "frequency": "Up to 1 page per second",
     "description": "Officially used for training Meta \"speech recognition technology,\" unknown if used to train Meta AI specifically."
+  },
+  "facebookexternalhit": {
+    "operator": "Meta/Facebook",
+    "respect": "[No](https://github.com/ai-robots-txt/ai.robots.txt/issues/40#issuecomment-2524591313)",
+    "function": "Ostensibly only for sharing, but likely used as an AI crawler as well",
+    "frequency": "Unclear at this time.",
+    "description": "Note that excluding FacebookExternalHit will block incorporating OpenGraph data when sharing in social media, including rich links in Apple's Messages app. [According to Meta](https://developers.facebook.com/docs/sharing/webmasters/web-crawlers/), its purpose is \"to crawl the content of an app or website that was shared on one of Meta’s family of apps…\". However, see discussions [here](https://github.com/ai-robots-txt/ai.robots.txt/pull/21) and [here](https://github.com/ai-robots-txt/ai.robots.txt/issues/40#issuecomment-2524591313) for evidence to the contrary."
   },
   "Factset_spyderbot": {
     "operator": "[Factset](https://www.factset.com/ai)",
@@ -194,6 +229,13 @@
     "function": "We are using the data from the crawler to build datasets for machine learning experiments.",
     "operator": "Unknown",
     "respect": "[Yes](https://imho.alex-kunz.com/2024/01/25/an-update-on-friendly-crawler)"
+  },
+  "Gemini-Deep-Research": {
+    "operator": "Unclear at this time.",
+    "respect": "Unclear at this time.",
+    "function": "AI Assistants",
+    "frequency": "Unclear at this time.",
+    "description": "Gemini-Deep-Research is the agent responsible for collecting and scanning resources used in Google Gemini's Deep Research feature, which acts as a personal research assistant. More info can be found at https://darkvisitors.com/agents/agents/gemini-deep-research"
   },
   "Google-CloudVertexBot": {
     "operator": "Google",
@@ -245,11 +287,11 @@
     "respect": "No"
   },
   "ICC-Crawler": {
-    "description": "Use the collected data for artificial intelligence technologies; provide data to third parties, including commercial companies; those companies can use the data for their own business.",
-    "frequency": "No information.",
-    "function": "Scrapes data to train and support AI technologies.",
     "operator": "[NICT](https://nict.go.jp)",
-    "respect": "Yes"
+    "respect": "Yes",
+    "function": "Scrapes data to train and support AI technologies.",
+    "frequency": "No information.",
+    "description": "Use the collected data for artificial intelligence technologies; provide data to third parties, including commercial companies; those companies can use the data for their own business."
   },
   "ImagesiftBot": {
     "description": "Once images and text are downloaded from a webpage, ImageSift analyzes this data from the page and stores the information in an index. Our web intelligence products use this index to enable search and retrieval of similar images.",
@@ -307,12 +349,33 @@
     "frequency": "Unclear at this time.",
     "description": "Meta-ExternalFetcher is dispatched by Meta AI products in response to user prompts, when they need to fetch an individual links. More info can be found at https://darkvisitors.com/agents/agents/meta-externalfetcher"
   },
+  "MistralAI-User": {
+    "operator": "Mistral",
+    "respect": "Unclear at this time.",
+    "function": "AI Assistants",
+    "frequency": "Unclear at this time.",
+    "description": "MistralAI-User is an AI assistant operated by Mistral. It's not currently known to be artificially intelligent or AI-related. If you think that's incorrect or can provide more detail about its purpose, please contact us. More info can be found at https://darkvisitors.com/agents/agents/mistralai-user"
+  },
   "MistralAI-User/1.0": {
     "operator": "Mistral AI",
     "function": "Takes action based on user prompts.",
     "frequency": "Only when prompted by a user.",
     "description": "MistralAI-User is for user actions in LeChat. When users ask LeChat a question, it may visit a web page to help answer and include a link to the source in its response.",
     "respect": "Yes"
+  },
+  "MyCentralAIScraperBot": {
+    "operator": "Unclear at this time.",
+    "respect": "Unclear at this time.",
+    "function": "AI data scraper",
+    "frequency": "Unclear at this time.",
+    "description": "Operator and data use is unclear at this time."
+  },
+  "netEstate Imprint Crawler": {
+    "operator": "netEstate",
+    "respect": "Unclear at this time.",
+    "function": "AI Data Scrapers",
+    "frequency": "Unclear at this time.",
+    "description": "netEstate Imprint Crawler is an AI data scraper operated by netEstate. If you think this is incorrect or can provide additional detail about its purpose, please contact us. More info can be found at https://darkvisitors.com/agents/agents/netestate-imprint-crawler"
   },
   "NovaAct": {
     "operator": "Unclear at this time.",
@@ -385,11 +448,11 @@
     "description": "Crawls sites to surface as results in Perplexity."
   },
   "PetalBot": {
-    "description": "Operated by Huawei to provide search and AI assistant services.",
-    "frequency": "No explicit frequency provided.",
-    "function": "Used to provide recommendations in Hauwei assistant and AI search services.",
     "operator": "[Huawei](https://huawei.com/)",
-    "respect": "Yes"
+    "respect": "Yes",
+    "function": "Used to provide recommendations in Hauwei assistant and AI search services.",
+    "frequency": "No explicit frequency provided.",
+    "description": "Operated by Huawei to provide search and AI assistant services."
   },
   "PhindBot": {
     "description": "Company offers an AI agent that uses AI and generate extra web query on the fly",
@@ -398,12 +461,19 @@
     "operator": "[phind](https://www.phind.com/)",
     "respect": "Unclear at this time."
   },
-  "QualifiedBot": {
-    "description": "Operated by Qualified as part of their suite of AI product offerings.",
+  "Poseidon Research Crawler": {
+    "operator": "[Poseidon Research](https://www.poseidonresearch.com)",
+    "description": "Lab focused on scaling the interpretability research necessary to make better AI systems possible.",
     "frequency": "No explicit frequency provided.",
-    "function": "Company offers AI agents and other related products; usage can be assumed to support said products.",
-    "operator": "[Qualified](https://www.qualified.com)",
+    "function": "AI research crawler",
     "respect": "Unclear at this time."
+  },
+  "QualifiedBot": {
+    "operator": "[Qualified](https://www.qualified.com)",
+    "respect": "Unclear at this time.",
+    "function": "Company offers AI agents and other related products; usage can be assumed to support said products.",
+    "frequency": "No explicit frequency provided.",
+    "description": "Operated by Qualified as part of their suite of AI product offerings."
   },
   "QuillBot": {
     "description": "Operated by QuillBot as part of their suite of AI product offerings.",
@@ -433,47 +503,19 @@
     "operator": "[Zyte](https://www.zyte.com)",
     "respect": "Unclear at this time."
   },
-  "SemrushBot": {
-    "operator": "[Semrush](https://www.semrush.com/)",
-    "respect": "[Yes](https://www.semrush.com/bot/)",
-    "function": "Crawls your site for ContentShake AI tool.",
-    "frequency": "Roughly once every 10 seconds.",
-    "description": "You enter one text (on-demand) and we will make suggestions on it (the tool uses AI but we are not actively crawling the web, you need to manually enter one text/URL)."
-  },
-  "SemrushBot-BA": {
-    "operator": "[Semrush](https://www.semrush.com/)",
-    "respect": "[Yes](https://www.semrush.com/bot/)",
-    "function": "Crawls your site for ContentShake AI tool.",
-    "frequency": "Roughly once every 10 seconds.",
-    "description": "You enter one text (on-demand) and we will make suggestions on it (the tool uses AI but we are not actively crawling the web, you need to manually enter one text/URL)."
-  },
-  "SemrushBot-CT": {
-    "operator": "[Semrush](https://www.semrush.com/)",
-    "respect": "[Yes](https://www.semrush.com/bot/)",
-    "function": "Crawls your site for ContentShake AI tool.",
-    "frequency": "Roughly once every 10 seconds.",
-    "description": "You enter one text (on-demand) and we will make suggestions on it (the tool uses AI but we are not actively crawling the web, you need to manually enter one text/URL)."
-  },
   "SemrushBot-OCOB": {
     "operator": "[Semrush](https://www.semrush.com/)",
     "respect": "[Yes](https://www.semrush.com/bot/)",
     "function": "Crawls your site for ContentShake AI tool.",
     "frequency": "Roughly once every 10 seconds.",
-    "description": "You enter one text (on-demand) and we will make suggestions on it (the tool uses AI but we are not actively crawling the web, you need to manually enter one text/URL)."
-  },
-  "SemrushBot-SI": {
-    "operator": "[Semrush](https://www.semrush.com/)",
-    "respect": "[Yes](https://www.semrush.com/bot/)",
-    "function": "Crawls your site for ContentShake AI tool.",
-    "frequency": "Roughly once every 10 seconds.",
-    "description": "You enter one text (on-demand) and we will make suggestions on it (the tool uses AI but we are not actively crawling the web, you need to manually enter one text/URL)."
+    "description": "Data collected is used for the ContentShake AI tool reports."
   },
   "SemrushBot-SWA": {
     "operator": "[Semrush](https://www.semrush.com/)",
     "respect": "[Yes](https://www.semrush.com/bot/)",
-    "function": "Checks URLs on your site for SWA tool.",
+    "function": "Checks URLs on your site for SEO Writing Assistant.",
     "frequency": "Roughly once every 10 seconds.",
-    "description": "You enter one text (on-demand) and we will make suggestions on it (the tool uses AI but we are not actively crawling the web, you need to manually enter one text/URL)."
+    "description": "Data collected is used for the SEO Writing Assistant tool to check if URL is accessible."
   },
   "Sidetrade indexer bot": {
     "description": "AI product training.",
@@ -502,6 +544,13 @@
     "function": "Scrapes data for business data sets and machine learning models.",
     "operator": "[Velen Crawler](https://velen.io)",
     "respect": "[Yes](https://velen.io)"
+  },
+  "WARDBot": {
+    "operator": "WEBSPARK",
+    "respect": "Unclear at this time.",
+    "function": "AI Data Scrapers",
+    "frequency": "Unclear at this time.",
+    "description": "WARDBot is an AI data scraper operated by WEBSPARK. It's not currently known to be artificially intelligent or AI-related. If you think that's incorrect or can provide more detail about its purpose, please contact us. More info can be found at https://darkvisitors.com/agents/agents/wardbot"
   },
   "Webzio-Extended": {
     "operator": "Unclear at this time.",
